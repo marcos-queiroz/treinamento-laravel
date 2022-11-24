@@ -4,7 +4,7 @@
         <title>APP Gestão - @yield('title')</title>
         <meta charset="utf-8">
 
-        <linK rel="stylesheet" href="{{ asset('css/styless.css') }}" >
+        <linK rel="stylesheet" href="{{ asset('css/styless.css?0.0.2') }}" >
     </head>
 
     <body>
