@@ -6,7 +6,7 @@
 
     <div class="conteudo-pagina">
         <div class="titulo-pagina-2">
-            <p>Visualizar - Adicionar</p>
+            <p>Visualizar - Produto</p>
         </div>
 
         <div class="menu">
@@ -37,7 +37,43 @@
                     </tr>
                     <tr>
                         <td>Unidade de Medida</td>
-                        <td>{{ $produto->unidade_id }}</td>
+                        <td>{{ $produto->unidade->unidade }}</td>
+                    </tr>
+                    <tr>
+                        <td>Comprimento</td>
+                        <td>{{ $produto->produtoDetalhe->comprimento ?? '' }}</td>
+                    </tr>
+                    <tr>
+                        <td>Altura</td>
+                        <td>{{ $produto->produtoDetalhe->altura ?? '' }}</td>
+                    </tr>
+                    <tr>
+                        <td>Largura</td>
+                        <td>{{ $produto->produtoDetalhe->largura ?? '' }}</td>
+                    </tr>
+                </table>
+
+                <br>
+
+                <table border="1" style="text-align: left">
+                    <tr>
+                        <th colspan="2">Fornecedor</th>
+                    </tr>
+                    <tr>
+                        <td>Nome</td>
+                        <td>{{ $produto->fornecedor->nome }}</td>
+                    </tr>
+                    <tr>
+                        <td>Site</td>
+                        <td>{{ $produto->fornecedor->site }}</td>
+                    </tr>
+                    <tr>
+                        <td>UF</td>
+                        <td>{{ $produto->fornecedor->uf }}</td>
+                    </tr>
+                    <tr>
+                        <td>E-mail</td>
+                        <td>{{ $produto->fornecedor->email }}</td>
                     </tr>
                 </table>
             </div>

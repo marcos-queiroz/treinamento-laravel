@@ -23,8 +23,9 @@
                         <tr>
                             <th>Nome</th>
                             <th>Descricao</th>
+                            <th>Fornecedor</th>
                             <th>Peso</th>
-                            <th>Unidade ID</th>
+                            <th>Unidade</th>
                             <th>Comprimento</th>
                             <th>Altura</th>
                             <th>Largura</th>
@@ -38,8 +39,9 @@
                             <tr>
                                 <td>{{ $produto->nome }}</td>
                                 <td>{{ $produto->descricao }}</td>
+                                <td>{{ $produto->fornecedor->nome }}</td>
                                 <td>{{ $produto->peso }}</td>
-                                <td>{{ $produto->unidade_id }}</td>
+                                <td>{{ $produto->unidade->unidade }}</td>
                                 <td>{{ $produto->produtoDetalhe->comprimento ?? '' }}</td>
                                 <td>{{ $produto->produtoDetalhe->altura ?? '' }}</td>
                                 <td>{{ $produto->produtoDetalhe->largura ?? '' }}</td>
@@ -52,6 +54,16 @@
                                         @method('DELETE')
                                         <a href="#" onclick="document.getElementById('form_{{ $produto->id }}').submit()">Excluir</a>
                                     </form>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td colspan="12">
+                                    <p>Pedidos:</p>
+                                    @foreach ($produto->pedidos as $pedido)
+                                        <a href="{{ route('pedido-produto.create', ['pedido' => $pedido]) }}">
+                                            Pedido {{ $pedido->id }} <br>
+                                        </a>
+                                    @endforeach
                                 </td>
                             </tr>
                         @endforeach

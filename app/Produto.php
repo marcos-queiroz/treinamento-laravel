@@ -8,10 +8,25 @@ class Produto extends Model
 {
     //
     protected $table = 'produtos';
-    protected $fillable = ['nome', 'descricao', 'peso', 'unidade_id'];
+    protected $fillable = ['fornecedor_id', 'nome', 'descricao', 'peso', 'unidade_id'];
 
     public function produtoDetalhe()
     {
         return $this->hasOne('App\ProdutoDetalhe');
+    }
+    
+    public function fornecedor()
+    {
+        return $this->belongsTo('App\Fornecedor');
+    }
+    
+    public function unidade()
+    {
+        return $this->belongsTo('App\Unidade');
+    }
+
+    public function pedidos()
+    {
+        return $this->belongsToMany('App\Pedido', 'pedido_produtos');
     }
 }
