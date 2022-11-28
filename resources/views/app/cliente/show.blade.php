@@ -30,6 +30,23 @@
                 </table>
 
                 <br>
+                <hr>
+                <h4>Pedidos</h4>
+
+                <table border="1" style="text-align: left">
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Data do pedido</th>
+                        </tr>
+                    </thead>
+                    @foreach ($cliente->pedidos as $pedido)
+                        <tr>
+                            <td>{{ $pedido->id }}</td>
+                            <td>{{ $pedido->created_at->format('d/m/Y H:i:s') }}</td>
+                        </tr>
+                    @endforeach
+                </table>
             </div>
         </div>
     </div>

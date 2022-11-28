@@ -54,6 +54,8 @@ class ClienteController extends Controller
      */
     public function show(Cliente $cliente)
     {
+        $cliente->pedidos;
+        
         return view('app.cliente.show', compact('cliente'));
     }
 

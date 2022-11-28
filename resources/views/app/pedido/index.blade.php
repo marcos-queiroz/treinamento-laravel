@@ -22,7 +22,7 @@
                     <thead>
                         <tr>
                             <th>ID Pedido</th>
-                            <th>ID Cliente</th>
+                            <th>Cliente</th>
                             <th>Produtos</th>
                             <th>Visualizar</th>
                             <th>Editar</th>
@@ -33,7 +33,7 @@
                         @foreach ($pedidos as $pedido)
                             <tr>
                                 <td>{{ $pedido->id }}</td>
-                                <td>{{ $pedido->cliente_id }}</td>
+                                <td>{{ $pedido->cliente->nome }}</td>
                                 <td><a href="{{ route('pedido-produto.create', ['pedido' => $pedido->id]) }}">Adicionar produtos</a></td>
                                 <td><a href="{{ route('pedido.show', ['pedido' => $pedido->id]) }}">Visualizar</a></td>
                                 <td><a href="{{ route('pedido.edit', ['pedido' => $pedido->id]) }}">Editar</a></td>
