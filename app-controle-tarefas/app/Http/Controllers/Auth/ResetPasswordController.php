@@ -27,4 +27,14 @@ class ResetPasswordController extends Controller
      * @var string
      */
     protected $redirectTo = RouteServiceProvider::HOME;
+
+    // exemplo de reescrita de metodo usado via traid
+    // protected function rules()
+    // {
+    //     return [
+    //         'token' => 'required',
+    //         'email' => 'required|email',
+    //         'password' => ['required', 'confirmed', 'min:4'],
+    //     ];
+    // }
 }

@@ -1,6 +1,8 @@
 <?php
 
+use App\Mail\MensagemTesteMail;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -18,7 +20,15 @@ Route::get('/', function () {
     return view('welcome');
 });
 
-Auth::routes();
+Auth::routes(['verify' => true]);
 
-Route::get('/home', [App\Http\Controllers\HomeController::class, 'index'])->name('home');
-Route::resource('tarefa', 'App\Http\Controllers\TarefaController');
+Route::get('/home', [App\Http\Controllers\HomeController::class, 'index'])->name('home')->middleware('verified');
+Route::resource('tarefa', 'App\Http\Controllers\TarefaController')->middleware('verified');
+
+Route::get('/mensagem-teste', function () {
+    return new MensagemTesteMail();
+
+    Mail::to('deboraluciana7@yahoo.com.br')->send(new MensagemTesteMail());
+
+    return 'E-mail enviado';
+});
