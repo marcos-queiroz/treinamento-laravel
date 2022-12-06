@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Modelo;
+use App\Repositories\ModeloRepository;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 
@@ -18,13 +19,30 @@ class ModeloController extends Controller
     /**
      * Display a listing of the resource.
      *
+     * @param  \Illuminate\Http\Request  $request
      * @return \Illuminate\Http\Response
      */
-    public function index()
+    public function index(Request  $request)
     {
-        $modelo = $this->modelo->with('marca')->get();
+        $modeloRepository = new ModeloRepository($this->modelo);
 
-        return response()->json($modelo, 200);
+        $modeloRepository->selectAtributosRegistrosRelacionados('marca');
+
+        if ($request->has('atributos')) {
+            $modeloRepository->selectAtributos('marca_id,' . $request->atributos);
+        }
+
+        if ($request->has('atributos_marca')) {
+            $modeloRepository->selectAtributosRegistrosRelacionados('marca:id,' . $request->atributos_marca);
+        }
+
+        if ($request->has('filtro')) {
+            $modeloRepository->filtro($request->filtro);
+        }
+
+        $modelos = $modeloRepository->getResultado();
+
+        return response()->json($modelos, 200);
     }
 
     /**
