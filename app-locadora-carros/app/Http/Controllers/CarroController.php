@@ -68,7 +68,7 @@ class CarroController extends Controller
      */
     public function show($id)
     {
-        $carro = $this->carro->with('marca')->find($id);
+        $carro = $this->carro->with('modelo')->find($id);
 
         if (is_null($carro)) {
             return response()->json(['error' => 'recurso solicitado não existe'], 404);
