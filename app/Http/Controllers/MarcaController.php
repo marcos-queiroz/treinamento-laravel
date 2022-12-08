@@ -42,7 +42,7 @@ class MarcaController extends Controller
             $marcaRepository->filtro($request->filtro);
         }
 
-        $marcas = $marcaRepository->getResultado();
+        $marcas = $marcaRepository->getResultadoPaginado(4);
 
         return response()->json($marcas, 200);
     }

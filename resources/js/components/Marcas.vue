@@ -34,7 +34,7 @@
                 <card-component title="Relação de marcas">
 
                     <template v-slot:content>
-                        <table-component></table-component>
+                        <table-component :title="titleTable" :data="dataTable"></table-component>
                     </template>
 
                     <template v-slot:footer>
@@ -88,6 +88,14 @@ export default {
             statusType: '',
             statusTitle: '',
             statusMsg: {},
+            titleTable: {
+                'id': { 'title': 'ID', 'type': 'string' },
+                'nome': { 'title': 'Nome', 'type': 'string' },
+                'imagem': { 'title': 'Imagem', 'type': 'image' },
+                'created_at': { 'title': 'Data de cadastro', 'type': 'date' },
+            },
+            dataTable: [],
+            marcas: [],
         }
     },
     computed: {
@@ -101,7 +109,28 @@ export default {
             return `Bearer ${token}`;
         }
     },
+    mounted() {
+        this.loadList();
+    },
     methods: {
+        loadList() {
+            let options = {
+                headers: {
+                    'Accept': 'application/json',
+                    'Authorization': this.token
+                }
+            };
+
+            axios.get(this.baseUrl, options)
+                .then(response => {
+                    this.marcas = response.data;
+
+                    this.dataTable = this.marcas.data;
+                })
+                .catch(errors => {
+                    console.error(erros);
+                });
+        },
         loadFile(e) {
             this.arquivoImagem = e.target.files;
         },
@@ -128,6 +157,8 @@ export default {
                     this.statusMsg = {
                         text: `ID do registro: ${response.data.id}`
                     }
+
+                    this.loadList();
                 })
                 .catch(errors => {
                     this.statusType = 'danger';
