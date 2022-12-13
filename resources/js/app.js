@@ -6,11 +6,26 @@
 
 require('./bootstrap');
 
-import moment from 'moment';
-
 window.Vue = require('vue').default;
 
-Vue.filter('formatDate', function(value) {
+/* importando e configurando o vuex */
+import Vuex from 'vuex';
+
+Vue.use(Vuex);
+
+const store = new Vuex.Store({
+    state: {
+        item: {},
+        transaction: { status: '', title: '', message: '', errors: '' },
+        form: { title: '', operation: 'create' }
+    }
+});
+
+/* importando a biblioteca moment para trabalhar com datas */
+import moment from 'moment';
+
+/* implementa o filtro para converter data */
+Vue.filter('formatDate', function (value) {
     if (value) {
         return moment(String(value)).format('MM/DD/YYYY hh:mm')
     }
@@ -37,6 +52,7 @@ Vue.component('modal-component', require('./components/Modal.vue').default);
 Vue.component('table-component', require('./components/Table.vue').default);
 Vue.component('alert-component', require('./components/Alert.vue').default);
 Vue.component('input-container-component', require('./components/InputContainer.vue').default);
+Vue.component('paginate-component', require('./components/Paginate.vue').default);
 
 /**
  * Next, we will create a fresh Vue application instance and attach it to
@@ -46,4 +62,5 @@ Vue.component('input-container-component', require('./components/InputContainer.
 
 const app = new Vue({
     el: '#app',
+    store,
 });

@@ -109,9 +109,9 @@ class MarcaController extends Controller
                 }
             }
 
-            $request->validate($regrasDinamicas, $marca->feedback());
+            $request->validate($regrasDinamicas);
         } else {
-            $request->validate($marca->rules(), $marca->feedback());
+            $request->validate($marca->rules());
         }
 
         $marca->fill($request->all());
@@ -122,6 +122,7 @@ class MarcaController extends Controller
             $imagem = $request->file('imagem');
             $marca->imagem = $imagem->store('imagens/marcas', 'public');
         }
+
 
         $marca->save();
 
