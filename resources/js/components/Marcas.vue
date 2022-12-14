@@ -298,17 +298,6 @@ export default {
       busca: { id: "", nome: "" },
     };
   },
-  computed: {
-    token() {
-      let token = document.cookie.split(";").find((i) => {
-        return i.includes("token=");
-      });
-
-      token = token.split("=")[1];
-
-      return `Bearer ${token}`;
-    },
-  },
   mounted() {
     this.loadList();
   },
@@ -344,15 +333,8 @@ export default {
     loadList() {
       let url = this.baseUrl + "?" + this.urlPaginate + this.urlFilter;
 
-      let options = {
-        headers: {
-          Accept: "application/json",
-          Authorization: this.token,
-        },
-      };
-
       axios
-        .get(url, options)
+        .get(url)
         .then((response) => {
           this.marcas = response.data;
 
@@ -378,8 +360,6 @@ export default {
       let options = {
         headers: {
           "Content-Type": "multipart/form-data",
-          Accept: "application/json",
-          Authorization: this.token,
         },
       };
 
@@ -419,8 +399,6 @@ export default {
       let options = {
         headers: {
           "Content-Type": "multipart/form-data",
-          Accept: "application/json",
-          Authorization: this.token,
         },
       };
 
@@ -455,15 +433,8 @@ export default {
 
       let url = this.baseUrl + "/" + this.$store.state.item.id;
 
-      let options = {
-        headers: {
-          Accept: "application/json",
-          Authorization: this.token,
-        },
-      };
-
       axios
-        .delete(url, options)
+        .delete(url)
         .then((response) => {
           this.$store.state.transaction.status = "success";
           this.$store.state.transaction.title =
