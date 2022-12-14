@@ -1,5 +1,5 @@
 @extends('layouts.app')
 
 @section('content')
-    Carregar component carros
+    Carregar component locacoes
 @endsection

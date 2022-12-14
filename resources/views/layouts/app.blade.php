@@ -39,10 +39,10 @@
                     <ul class="navbar-nav me-auto">
                         @auth
                             <li class="nav-intem">
-                                <a href="" class="nav-link">Clientes</a>
+                                <a href="{{ route('clientes') }}" class="nav-link">Clientes</a>
                             </li>
                             <li class="nav-intem">
-                                <a href="" class="nav-link">Locações</a>
+                                <a href="{{ route('locacoes') }}" class="nav-link">Locações</a>
                             </li>
                             <li class="nav-item dropdown">
                                 <a href="#" class="nav-link dropdown-toggle" data-bs-toggle="dropdown">Veículos</a>

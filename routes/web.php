@@ -23,6 +23,14 @@ Auth::routes();
 Route::get('/home', [App\Http\Controllers\HomeController::class, 'index'])->name('home');
 
 Route::middleware('auth')->group(function () {
+    Route::get('/clientes', function () {
+        return view('app.clientes');
+    })->name('clientes');
+
+    Route::get('/locacoes', function () {
+        return view('app.locacoes');
+    })->name('locacoes');
+    
     Route::get('/carros', function () {
         return view('app.carros');
     })->name('carros');
