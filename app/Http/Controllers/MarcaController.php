@@ -8,6 +8,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 use PhpOffice\PhpSpreadsheet\Calculation\Financial\CashFlow\Constant\Periodic\Interest;
 use Ramsey\Uuid\Type\Integer;
+use Illuminate\Support\Facades\Cache;
 
 class MarcaController extends Controller
 {
@@ -26,23 +27,27 @@ class MarcaController extends Controller
      */
     public function index(Request  $request)
     {
-        $marcaRepository = new MarcaRepository($this->marca);
+        $this->request = $request;
+        
+        $marcas = Cache::remember('marcas', 15, function () {
+            $marcaRepository = new MarcaRepository($this->marca);
 
-        $marcaRepository->selectAtributosRegistrosRelacionados('modelos');
+            $marcaRepository->selectAtributosRegistrosRelacionados('modelos');
 
-        if ($request->has('atributos')) {
-            $marcaRepository->selectAtributos($request->atributos);
-        }
+            if ($this->request->has('atributos')) {
+                $marcaRepository->selectAtributos($this->request->atributos);
+            }
 
-        if ($request->has('atributos_modelos')) {
-            $marcaRepository->selectAtributosRegistrosRelacionados('modelos:id,marca_id,' . $request->atributos_modelos);
-        }
+            if ($this->request->has('atributos_modelos')) {
+                $marcaRepository->selectAtributosRegistrosRelacionados('modelos:id,marca_id,' . $this->request->atributos_modelos);
+            }
 
-        if ($request->has('filtro')) {
-            $marcaRepository->filtro($request->filtro);
-        }
+            if ($this->request->has('filtro')) {
+                $marcaRepository->filtro($this->request->filtro);
+            }
 
-        $marcas = $marcaRepository->getResultadoPaginado(4);
+            return $marcaRepository->getResultadoPaginado(4);
+        });
 
         return response()->json($marcas, 200);
     }
