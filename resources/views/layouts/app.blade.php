@@ -19,6 +19,8 @@
 
     <!-- Styles -->
     <link href="{{ asset('css/app.css') }}" rel="stylesheet">
+
+    <meta name="api-base-url" content="{{ url('api') }}" />
 </head>
 
 <body>

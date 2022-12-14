@@ -283,7 +283,7 @@
 export default {
   data() {
     return {
-      baseUrl: "http://app.locadora.localhost/api/v1/marca",
+      baseUrl: "/v1/marca",
       urlPaginate: "",
       urlFilter: "",
       arquivoImagem: [],
