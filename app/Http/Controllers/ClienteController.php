@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Cliente;
 use App\Repositories\ClienteRepository;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Cache;
 
 class ClienteController extends Controller
 {
@@ -23,19 +24,23 @@ class ClienteController extends Controller
      */
     public function index(Request  $request)
     {
-        $clienteRepository = new ClienteRepository($this->cliente);
+        $this->request = $request;
 
-        $clienteRepository->selectAtributosRegistrosRelacionados('carros');
+        $clientes = Cache::remember($request->fullUrl(), 600, function () {
+            $clienteRepository = new ClienteRepository($this->cliente);
 
-        if ($request->has('atributos')) {
-            $clienteRepository->selectAtributos('id,' . $request->atributos);
-        }
+            $clienteRepository->selectAtributosRegistrosRelacionados('carros');
 
-        if ($request->has('filtro')) {
-            $clienteRepository->filtro($request->filtro);
-        }
+            if ($this->request->has('atributos')) {
+                $clienteRepository->selectAtributos('id,' . $this->request->atributos);
+            }
 
-        $clientes = $clienteRepository->getResultado();
+            if ($this->request->has('filtro')) {
+                $clienteRepository->filtro($this->request->filtro);
+            }
+
+            return $clienteRepository->getResultado();
+        });
 
         return response()->json($clientes, 200);
     }
@@ -52,6 +57,8 @@ class ClienteController extends Controller
 
         $cliente = $this->cliente->create($request->all());
 
+        Cache::flush();
+
         return response()->json($cliente, 201);
     }
 
@@ -63,7 +70,12 @@ class ClienteController extends Controller
      */
     public function show($id)
     {
-        $cliente = $this->cliente->find($id);
+        $this->id = $id;
+
+        $cliente = Cache::remember('carro_' . $id, 600, function () {
+            return $this->cliente->find($this->id);
+        });
+
 
         if (is_null($cliente)) {
             return response()->json(['error' => 'recurso solicitado não existe'], 404);
@@ -105,6 +117,8 @@ class ClienteController extends Controller
 
         $cliente->save();
 
+        Cache::flush();
+
         return response()->json($cliente, 200);
     }
 
@@ -123,6 +137,8 @@ class ClienteController extends Controller
         }
 
         $cliente->delete();
+
+        Cache::flush();
 
         return response()->json(['msg' => 'O cliente ' . $cliente->nome . ' foi removido com sucesso'], 200);
     }

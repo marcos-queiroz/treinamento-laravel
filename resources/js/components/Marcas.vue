@@ -436,6 +436,8 @@ export default {
       axios
         .delete(url)
         .then((response) => {
+          this.$store.state.item.nome = '';
+
           this.$store.state.transaction.status = "success";
           this.$store.state.transaction.title =
             "Transação realizada com sucesso";

@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Carro;
 use App\Repositories\CarroRepository;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Cache;
 
 class CarroController extends Controller
 {
@@ -23,24 +24,28 @@ class CarroController extends Controller
      */
     public function index(Request  $request)
     {
-        $carroRepository = new CarroRepository($this->carro);
+        $this->request = $request;
 
-        $carroRepository->selectAtributosRegistrosRelacionados('modelo');
-        $carroRepository->selectAtributosRegistrosRelacionados('clientes');
+        $carros = Cache::remember($request->fullUrl(), 600, function () {
+            $carroRepository = new CarroRepository($this->carro);
 
-        if ($request->has('atributos')) {
-            $carroRepository->selectAtributos('modelo_id,' . $request->atributos);
-        }
+            $carroRepository->selectAtributosRegistrosRelacionados('modelo');
+            $carroRepository->selectAtributosRegistrosRelacionados('clientes');
 
-        if ($request->has('atributos_modelo')) {
-            $carroRepository->selectAtributosRegistrosRelacionados('modelo:id,' . $request->atributos_modelo);
-        }
+            if ($this->request->has('atributos')) {
+                $carroRepository->selectAtributos('modelo_id,' . $this->request->atributos);
+            }
 
-        if ($request->has('filtro')) {
-            $carroRepository->filtro($request->filtro);
-        }
+            if ($this->request->has('atributos_modelo')) {
+                $carroRepository->selectAtributosRegistrosRelacionados('modelo:id,' . $this->request->atributos_modelo);
+            }
 
-        $carros = $carroRepository->getResultado();
+            if ($this->request->has('filtro')) {
+                $carroRepository->filtro($this->request->filtro);
+            }
+
+            return $carroRepository->getResultado();
+        });
 
         return response()->json($carros, 200);
     }
@@ -57,6 +62,8 @@ class CarroController extends Controller
 
         $carro = $this->carro->create($request->all());
 
+        Cache::flush();
+
         return response()->json($carro, 201);
     }
 
@@ -68,7 +75,11 @@ class CarroController extends Controller
      */
     public function show($id)
     {
-        $carro = $this->carro->with('modelo')->find($id);
+        $this->id = $id;
+
+        $carro = Cache::remember('carro_' . $id, 600, function () {
+            $this->carro->with('modelo')->find($this->id);
+        });
 
         if (is_null($carro)) {
             return response()->json(['error' => 'recurso solicitado não existe'], 404);
@@ -110,6 +121,8 @@ class CarroController extends Controller
 
         $carro->save();
 
+        Cache::flush();
+
         return response()->json($carro, 200);
     }
 
@@ -128,6 +141,8 @@ class CarroController extends Controller
         }
 
         $carro->delete();
+
+        Cache::flush();
 
         return response()->json(['msg' => 'O carro ' . $carro->placa . ' foi removido com sucesso'], 200);
     }

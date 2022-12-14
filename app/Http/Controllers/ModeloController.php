@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Modelo;
 use App\Repositories\ModeloRepository;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Storage;
 
 class ModeloController extends Controller
@@ -24,23 +25,27 @@ class ModeloController extends Controller
      */
     public function index(Request  $request)
     {
-        $modeloRepository = new ModeloRepository($this->modelo);
+        $this->request = $request;
 
-        $modeloRepository->selectAtributosRegistrosRelacionados('marca');
+        $modelos = Cache::remember($request->fullUrl(), 600, function () {
+            $modeloRepository = new ModeloRepository($this->modelo);
 
-        if ($request->has('atributos')) {
-            $modeloRepository->selectAtributos('marca_id,' . $request->atributos);
-        }
+            $modeloRepository->selectAtributosRegistrosRelacionados('marca');
 
-        if ($request->has('atributos_marca')) {
-            $modeloRepository->selectAtributosRegistrosRelacionados('marca:id,' . $request->atributos_marca);
-        }
+            if ($this->request->has('atributos')) {
+                $modeloRepository->selectAtributos('marca_id,' . $this->request->atributos);
+            }
 
-        if ($request->has('filtro')) {
-            $modeloRepository->filtro($request->filtro);
-        }
+            if ($this->request->has('atributos_marca')) {
+                $modeloRepository->selectAtributosRegistrosRelacionados('marca:id,' . $this->request->atributos_marca);
+            }
 
-        $modelos = $modeloRepository->getResultado();
+            if ($this->request->has('filtro')) {
+                $modeloRepository->filtro($this->request->filtro);
+            }
+
+            return $modeloRepository->getResultado();
+        });
 
         return response()->json($modelos, 200);
     }
@@ -68,6 +73,8 @@ class ModeloController extends Controller
             'abs' => $request->abs,
         ]);
 
+        Cache::flush();
+
         return response()->json($modelo, 201);
     }
 
@@ -79,7 +86,11 @@ class ModeloController extends Controller
      */
     public function show($id)
     {
-        $modelo = $this->modelo->with('marca')->find($id);
+        $this->id = $id;
+
+        $modelo = Cache::remember('modelo_' . $id, 600, function () {
+            $this->modelo->with('marca')->find($this->id);
+        });
 
         if (is_null($modelo)) {
             return response()->json(['error' => 'recurso solicitado não existe'], 404);
@@ -128,6 +139,8 @@ class ModeloController extends Controller
 
         $modelo->save();
 
+        Cache::flush();
+
         return response()->json($modelo, 200);
     }
 
@@ -148,6 +161,8 @@ class ModeloController extends Controller
         Storage::disk('public')->delete($modelo->imagem);
 
         $modelo->delete();
+
+        Cache::flush();
 
         return response()->json(['msg' => 'O modelo ' . $modelo->nome . ' foi removida com sucesso'], 200);
     }

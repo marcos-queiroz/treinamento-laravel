@@ -28,8 +28,8 @@ class MarcaController extends Controller
     public function index(Request  $request)
     {
         $this->request = $request;
-        
-        $marcas = Cache::remember('marcas', 15, function () {
+
+        $marcas = Cache::remember($request->fullUrl(), 600, function () {
             $marcaRepository = new MarcaRepository($this->marca);
 
             $marcaRepository->selectAtributosRegistrosRelacionados('modelos');
@@ -70,6 +70,8 @@ class MarcaController extends Controller
             'imagem' => $urn_imagem
         ]);
 
+        Cache::flush();
+
         return response()->json($marca, 201);
     }
 
@@ -81,8 +83,12 @@ class MarcaController extends Controller
      */
     public function show($id)
     {
-        $marca = $this->marca->with('modelos')->find($id);
+        $this->id = $id;
 
+        $marca = Cache::remember('marca_'. $id, 600, function () {
+            return $this->marca->with('modelos')->find($this->id);
+        });
+        
         if (is_null($marca)) {
             return response()->json(['error' => 'recurso solicitado não existe'], 404);
         }
@@ -128,8 +134,9 @@ class MarcaController extends Controller
             $marca->imagem = $imagem->store('imagens/marcas', 'public');
         }
 
-
         $marca->save();
+
+        Cache::flush();
 
         return response()->json($marca, 200);
     }

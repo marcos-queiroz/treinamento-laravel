@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Locacao;
 use App\Repositories\LocacaoRepository;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Cache;
 
 class LocacaoController extends Controller
 {
@@ -23,28 +24,33 @@ class LocacaoController extends Controller
      */
     public function index(Request  $request)
     {
-        $locacaoRepository = new LocacaoRepository($this->locacao);
+        $this->request = $request;
 
-        $locacaoRepository->selectAtributosRegistrosRelacionados('cliente');
-        $locacaoRepository->selectAtributosRegistrosRelacionados('carro');
+        $locacoes = Cache::remember($request->fullUrl(), 600, function () {
+            $locacaoRepository = new LocacaoRepository($this->locacao);
 
-        if ($request->has('atributos')) {
-            $locacaoRepository->selectAtributos('cliente_id,carro_id,' . $request->atributos);
-        }
+            $locacaoRepository->selectAtributosRegistrosRelacionados('cliente');
+            $locacaoRepository->selectAtributosRegistrosRelacionados('carro');
 
-        if ($request->has('atributos_cliente')) {
-            $locacaoRepository->selectAtributosRegistrosRelacionados('cliente:id,' . $request->atributos_cliente);
-        }
+            if ($this->request->has('atributos')) {
+                $locacaoRepository->selectAtributos('cliente_id,carro_id,' . $this->request->atributos);
+            }
 
-        if ($request->has('atributos_carro')) {
-            $locacaoRepository->selectAtributosRegistrosRelacionados('carro:id,' . $request->atributos_carro);
-        }
+            if ($this->request->has('atributos_cliente')) {
+                $locacaoRepository->selectAtributosRegistrosRelacionados('cliente:id,' . $this->request->atributos_cliente);
+            }
 
-        if ($request->has('filtro')) {
-            $locacaoRepository->filtro($request->filtro);
-        }
+            if ($this->request->has('atributos_carro')) {
+                $locacaoRepository->selectAtributosRegistrosRelacionados('carro:id,' . $this->request->atributos_carro);
+            }
 
-        $locacoes = $locacaoRepository->getResultado();
+            if ($this->request->has('filtro')) {
+                $locacaoRepository->filtro($this->request->filtro);
+            }
+
+            return $locacaoRepository->getResultado();
+        });
+
 
         return response()->json($locacoes, 200);
     }
@@ -61,6 +67,8 @@ class LocacaoController extends Controller
 
         $locacao = $this->locacao->create($request->all());
 
+        Cache::flush();
+
         return response()->json($locacao, 201);
     }
 
@@ -72,7 +80,11 @@ class LocacaoController extends Controller
      */
     public function show($id)
     {
-        $locacao = $this->locacao->with('cliente', 'carro')->find($id);
+        $this->id = $id;
+
+        $locacao = Cache::remember('locacao_' . $id, 600, function () {
+            return $this->locacao->with('cliente', 'carro')->find($this->id);
+        });
 
         if (is_null($locacao)) {
             return response()->json(['error' => 'recurso solicitado não existe'], 404);
@@ -114,6 +126,8 @@ class LocacaoController extends Controller
 
         $locacao->save();
 
+        Cache::flush();
+
         return response()->json($locacao, 200);
     }
 
@@ -132,6 +146,8 @@ class LocacaoController extends Controller
         }
 
         $locacao->delete();
+
+        Cache::flush();
 
         return response()->json(['msg' => 'A Locação ' . $locacao->id . ' foi removida com sucesso'], 200);
     }
