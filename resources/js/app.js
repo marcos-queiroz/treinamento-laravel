@@ -45,6 +45,8 @@ Vue.filter('formatDate', function (value) {
 Vue.component('example-component', require('./components/ExampleComponent.vue').default);
 Vue.component('login-component', require('./components/Login.vue').default);
 Vue.component('home-component', require('./components/Home.vue').default);
+
+Vue.component('carros-component', require('./components/Carros.vue').default);
 Vue.component('marcas-component', require('./components/Marcas.vue').default);
 
 Vue.component('card-component', require('./components/Card.vue').default);
@@ -60,7 +62,10 @@ Vue.component('paginate-component', require('./components/Paginate.vue').default
  * or customize the JavaScript scaffolding to fit your unique needs.
  */
 
+import vuetify from '../plugins/vuetify' // path to vuetify export
+
 const app = new Vue({
     el: '#app',
     store,
+    vuetify
 });

@@ -1,11 +1,11 @@
 <template>
-  <div class="container">
-    <div class="row justify-content-center">
-      <div class="col-md-8">
+  <v-container>
+    <v-row>
+      <v-col md="10" class="mx-auto">
         <card-component title="Busca de marcas">
           <template v-slot:content>
-            <div class="row">
-              <div class="col mb-3">
+            <v-row>
+              <v-col class="mb-3">
                 <input-container-component
                   id="buscaId"
                   title="ID"
@@ -20,9 +20,9 @@
                     aria-describedby="idHelp"
                   />
                 </input-container-component>
-              </div>
+              </v-col>
 
-              <div class="col mb-3">
+              <v-col class="mb-3">
                 <input-container-component
                   id="buscaNome"
                   title="Nome"
@@ -37,8 +37,8 @@
                     aria-describedby="nomeHelp"
                   />
                 </input-container-component>
-              </div>
-            </div>
+              </v-col>
+            </v-row>
           </template>
 
           <template v-slot:footer>
@@ -53,6 +53,19 @@
 
         <card-component title="Relação de marcas">
           <template v-slot:content>
+            <v-row>
+              <v-co>
+                <button
+                  class="btn btn-success btn-sm float-end"
+                  data-bs-toggle="modal"
+                  data-bs-target="#modalForm"
+                  @click="createForm()"
+                >
+                  Adicionar
+                </button>
+              </v-co>
+            </v-row>
+
             <table-component
               :title="titleTable"
               :data="dataTable"
@@ -81,34 +94,12 @@
           </template>
 
           <template v-slot:footer>
-            <div class="row">
-              <div class="col-10">
-                <paginate-component>
-                  <li
-                    class="page-item"
-                    v-for="(l, key) in marcas.links"
-                    :key="key"
-                  >
-                    <a
-                      class="page-link"
-                      :class="l.active ? 'active' : ''"
-                      @click="paginate(l)"
-                      v-html="l.label"
-                    ></a>
-                  </li>
-                </paginate-component>
-              </div>
-              <div class="col-2 py-1">
-                <button
-                  class="btn btn-success btn-sm float-end"
-                  data-bs-toggle="modal"
-                  data-bs-target="#modalForm"
-                  @click="createForm()"
-                >
-                  Adicionar
-                </button>
-              </div>
-            </div>
+            <v-pagination
+              v-model="pagination.current"
+              :length="pagination.total"
+              :total-visible="pagination.per_page"
+              @input="loadList"
+            ></v-pagination>
           </template>
         </card-component>
 
@@ -274,9 +265,9 @@
           </template>
         </modal-component>
         <!--/ Modal Form -->
-      </div>
-    </div>
-  </div>
+      </v-col>
+    </v-row>
+  </v-container>
 </template>
 
 <script>
@@ -284,7 +275,6 @@ export default {
   data() {
     return {
       baseUrl: "/v1/marca",
-      urlPaginate: "",
       urlFilter: "",
       arquivoImagem: [],
       titleTable: {
@@ -296,6 +286,10 @@ export default {
       dataTable: [],
       marcas: [],
       busca: { id: "", nome: "" },
+      pagination: {
+        current: 1,
+        total: 0,
+      },
     };
   },
   mounted() {
@@ -316,7 +310,6 @@ export default {
       }
 
       if (filter) {
-        this.urlPaginate = "page=1";
         this.urlFilter = "&filtro=" + filter;
       } else {
         this.urlFilter = "";
@@ -324,24 +317,23 @@ export default {
 
       this.loadList();
     },
-    paginate(link) {
-      if (link.url) {
-        this.urlPaginate = link.url.split("?")[1];
-        this.loadList();
-      }
-    },
     loadList() {
-      let url = this.baseUrl + "?" + this.urlPaginate + this.urlFilter;
+      let url =
+        this.baseUrl + "?page=" + this.pagination.current + this.urlFilter;
 
       axios
         .get(url)
         .then((response) => {
           this.marcas = response.data;
 
+          this.pagination.current = response.data.current_page;
+          this.pagination.total = response.data.last_page;
+          this.pagination.per_page = response.data.per_page;
+
           this.dataTable = this.marcas.data;
         })
         .catch((errors) => {
-          console.error(erros);
+          console.error(errors);
         });
     },
     loadFile(e) {
@@ -436,7 +428,7 @@ export default {
       axios
         .delete(url)
         .then((response) => {
-          this.$store.state.item.nome = '';
+          this.$store.state.item.nome = "";
 
           this.$store.state.transaction.status = "success";
           this.$store.state.transaction.title =

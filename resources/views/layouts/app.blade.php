@@ -20,6 +20,8 @@
     <!-- Styles -->
     <link href="{{ asset('css/app.css') }}" rel="stylesheet">
 
+    <link href="https://fonts.googleapis.com/css?family=Roboto:100,300,400,500,700,900" rel="stylesheet">
+
     <meta name="api-base-url" content="{{ url('api') }}" />
 </head>
 
@@ -106,9 +108,15 @@
         @endauth
 
         <main class="py-4">
-            @yield('content')
+            <v-app>
+                <v-main>
+                    @yield('content')
+                </v-main>
+            </v-app>
         </main>
     </div>
+
+    <link href="https://cdn.jsdelivr.net/npm/@mdi/font@6.x/css/materialdesignicons.min.css" rel="stylesheet">
 </body>
 
 </html>

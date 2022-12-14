@@ -63,7 +63,7 @@ axios.interceptors.response.use(
     error => {
         /* renova o token JWT caso expire */
         if (error.response.status == 401 && error.response.data.message == 'Unauthenticated.') {
-            axios.post('http://app.locadora.localhost/api/refresh')
+            axios.post('/refresh')
                 .then(response => {
                     document.cookie = `token=${response.data.access_token};SameSite=Lax`
                     window.location.reload();

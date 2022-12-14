@@ -44,7 +44,7 @@ class CarroController extends Controller
                 $carroRepository->filtro($this->request->filtro);
             }
 
-            return $carroRepository->getResultado();
+            return $carroRepository->getResultadoPaginado(4);
         });
 
         return response()->json($carros, 200);

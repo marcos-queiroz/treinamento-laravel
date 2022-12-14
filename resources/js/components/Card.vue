@@ -1,17 +1,17 @@
 <template>
-    <div class="card mb-3">
-        <div class="card-header">{{ title }}</div>
-        <div class="card-body">
-            <slot name="content"></slot>
-        </div>
-        <div class="card-footer">
-            <slot name="footer"></slot>
-        </div>
-    </div>
+  <v-card elevation="1" class="mb-3">
+    <v-card-title>{{ title }}</v-card-title>
+    <v-card-text>
+      <slot name="content"></slot>
+    </v-card-text>
+    <v-card-actions>
+      <slot name="footer"></slot>
+    </v-card-actions>
+  </v-card>
 </template>
 
 <script>
 export default {
-    props: ['title']
-}
+  props: ["title"],
+};
 </script>
