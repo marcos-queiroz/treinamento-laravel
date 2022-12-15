@@ -159,6 +159,8 @@ class MarcaController extends Controller
 
         $marca->delete();
 
+        Cache::flush();
+
         return response()->json(['msg' => 'A marca ' . $marca->nome . ' foi removida com sucesso'], 200);
     }
 }

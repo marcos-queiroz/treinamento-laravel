@@ -54,43 +54,101 @@
         <card-component title="Relação de marcas">
           <template v-slot:content>
             <v-row>
-              <v-co>
-                <button
-                  class="btn btn-success btn-sm float-end"
-                  data-bs-toggle="modal"
-                  data-bs-target="#modalForm"
-                  @click="createForm()"
+              <v-col>
+                <v-btn
+                  color="success"
+                  @click="
+                    openDialog({
+                      title: 'Cadastrar marca',
+                      operation: 'create',
+                    })
+                  "
                 >
                   Adicionar
-                </button>
-              </v-co>
+                </v-btn>
+              </v-col>
             </v-row>
 
-            <table-component
-              :title="titleTable"
-              :data="dataTable"
-              :show="{
-                visible: true,
-                dataToggle: 'modal',
-                dataTarget: '#modalForm',
-                title: 'Visualizar marca',
-                operation: 'show',
-              }"
-              :edit="{
-                visible: true,
-                dataToggle: 'modal',
-                dataTarget: '#modalForm',
-                title: 'Atualizar marca',
-                operation: 'edit',
-              }"
-              :destroy="{
-                visible: true,
-                dataToggle: 'modal',
-                dataTarget: '#modalForm',
-                title: 'Remover marca',
-                operation: 'destroy',
-              }"
-            ></table-component>
+            <v-simple-table>
+              <template v-slot:default>
+                <thead>
+                  <tr>
+                    <th class="text-left">ID</th>
+                    <th class="text-left">Nome</th>
+                    <th class="text-left">Logo</th>
+                    <th class="text-left">Data de cadastro</th>
+                    <th>Opções</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr v-for="marca in marcas" :key="marca.id">
+                    <td>{{ marca.id }}</td>
+                    <td>{{ marca.nome }}</td>
+                    <td>
+                      <img
+                        :src="`/storage/${marca.imagem}`"
+                        :alt="`Logo ${marca.nome}`"
+                        width="30"
+                      />
+                    </td>
+                    <td>{{ marca.created_at | formatDate }}</td>
+                    <td>
+                      <v-btn
+                        elevation="2"
+                        small
+                        outlined
+                        color="info"
+                        @click="
+                          openDialog(
+                            {
+                              title: 'Visualizar marca',
+                              operation: 'show',
+                            },
+                            marca
+                          )
+                        "
+                      >
+                        Visualizar
+                      </v-btn>
+                      <v-btn
+                        elevation="2"
+                        small
+                        outlined
+                        color="blue-grey"
+                        @click="
+                          openDialog(
+                            {
+                              title: 'Atualizar marca',
+                              operation: 'edit',
+                            },
+                            marca
+                          )
+                        "
+                      >
+                        Editar
+                      </v-btn>
+                      <v-btn
+                        elevation="2"
+                        small
+                        outlined
+                        color="red"
+                        @click="
+                          openDialog(
+                            {
+                              title: 'Remover marca',
+                              operation: 'destroy',
+                            },
+                            marca
+                          )
+                        "
+                      >
+                        Remover
+                      </v-btn>
+                    </td>
+                  </tr>
+                </tbody>
+              </template>
+            </v-simple-table>
           </template>
 
           <template v-slot:footer>
@@ -103,166 +161,159 @@
           </template>
         </card-component>
 
+        <div class="text-center">
+          <v-dialog v-model="dialog" width="500">
+            <v-card>
+              <v-card-title class="text-h5 grey lighten-2">
+                {{ $store.state.form.title }}
+              </v-card-title>
+
+              <v-card-text>
+                <alert-component
+                  class="py-2"
+                  v-if="$store.state.transaction.status"
+                  :type="$store.state.transaction.status"
+                  :title="$store.state.transaction.title"
+                  :message="$store.state.transaction.message"
+                  :errors="$store.state.transaction.errors"
+                >
+                </alert-component>
+
+                <template
+                  v-if="
+                    $store.state.form.operation == 'create' ||
+                    $store.state.form.operation == 'edit'
+                  "
+                >
+                  <v-text-field
+                    v-model="$store.state.item.nome"
+                    label="Nome"
+                    required
+                  ></v-text-field>
+
+                  <v-file-input
+                    show-size
+                    v-model="imagem"
+                    truncate-length="15"
+                    accept="image/*"
+                    label="Anexe uma imagem"
+                  ></v-file-input>
+                </template>
+
+                <template v-if="$store.state.form.operation == 'show'">
+                  <div class="row">
+                    <div class="col-3 mb-3">
+                      <input-container-component title="ID">
+                        <input
+                          type="number"
+                          class="form-control"
+                          :value="$store.state.item.id"
+                          disabled
+                        />
+                      </input-container-component>
+                    </div>
+                    <div class="col-4 mb-3">
+                      <input-container-component title="Nome">
+                        <input
+                          type="text"
+                          class="form-control"
+                          :value="$store.state.item.nome"
+                          disabled
+                        />
+                      </input-container-component>
+                    </div>
+                    <div class="col-5 mb-3">
+                      <input-container-component title="Data de cadastro">
+                        <input
+                          type="text"
+                          class="form-control"
+                          :value="$store.state.item.created_at | formatDate"
+                          disabled
+                        />
+                      </input-container-component>
+                    </div>
+                    <div class="col-12 mb-3">
+                      <input-container-component title="Imagem" v-if="imagem">
+                        <img
+                          :src="`/storage/${imagem}`"
+                          alt="Logo"
+                          width="60"
+                        />
+                      </input-container-component>
+                    </div>
+                  </div>
+                </template>
+
+                <template v-if="$store.state.form.operation == 'destroy'">
+                  <div class="row">
+                    <div class="col-3 mb-3">
+                      <input-container-component title="ID">
+                        <input
+                          type="number"
+                          class="form-control"
+                          :value="$store.state.item.id"
+                          disabled
+                        />
+                      </input-container-component>
+                    </div>
+                    <div class="col-9 mb-3">
+                      <input-container-component title="Nome">
+                        <input
+                          type="text"
+                          class="form-control"
+                          :value="$store.state.item.nome"
+                          disabled
+                        />
+                      </input-container-component>
+                    </div>
+                  </div>
+                </template>
+              </v-card-text>
+
+              <v-divider></v-divider>
+
+              <v-card-actions>
+                <v-spacer></v-spacer>
+                <v-btn
+                  v-if="$store.state.form.operation == 'create'"
+                  color="primary"
+                  @click="save()"
+                >
+                  Salvar
+                </v-btn>
+
+                <v-btn
+                  v-if="$store.state.form.operation == 'edit'"
+                  color="info"
+                  @click="update()"
+                >
+                  Atualizar
+                </v-btn>
+
+                <v-btn
+                  v-if="
+                    $store.state.form.operation == 'destroy' &&
+                    $store.state.transaction.status !== 'success'
+                  "
+                  color="red"
+                  @click="destroy()"
+                >
+                  Remover
+                </v-btn>
+
+                <v-btn color="primary" @click="dialog = false"> Fechar </v-btn>
+              </v-card-actions>
+            </v-card>
+          </v-dialog>
+        </div>
+
         <!-- Modal Form -->
         <modal-component id="modalForm" :title="$store.state.form.title">
-          <template v-slot:alerts>
-            <alert-component
-              v-if="$store.state.transaction.status"
-              :type="$store.state.transaction.status"
-              :title="$store.state.transaction.title"
-              :message="$store.state.transaction.message"
-              :errors="$store.state.transaction.errors"
-            >
-            </alert-component>
-          </template>
+          <template v-slot:alerts> </template>
 
-          <template v-slot:content>
-            <template
-              v-if="
-                $store.state.form.operation == 'create' ||
-                $store.state.form.operation == 'edit'
-              "
-            >
-              <input-container-component
-                id="inputNome"
-                title="Nome"
-                id-help="nomeHelp"
-                text-help="Informe o nome da marca"
-              >
-                <input
-                  v-model="$store.state.item.nome"
-                  type="text"
-                  id="inputNome"
-                  class="form-control"
-                  aria-describedby="nomeHelp"
-                />
-              </input-container-component>
+          <template v-slot:content> </template>
 
-              <input-container-component
-                id="inputImagem"
-                title="Imagem"
-                id-help="imagemHelp"
-                text-help="Selecione uma imagem no formato PNG"
-              >
-                <input
-                  @change="loadFile($event)"
-                  type="file"
-                  id="inputImagem"
-                  class="form-control"
-                  aria-describedby="imagemHelp"
-                />
-              </input-container-component>
-            </template>
-
-            <template v-if="$store.state.form.operation == 'show'">
-              <div class="row">
-                <div class="col-3 mb-3">
-                  <input-container-component title="ID">
-                    <input
-                      type="number"
-                      class="form-control"
-                      :value="$store.state.item.id"
-                      disabled
-                    />
-                  </input-container-component>
-                </div>
-                <div class="col-4 mb-3">
-                  <input-container-component title="Nome">
-                    <input
-                      type="text"
-                      class="form-control"
-                      :value="$store.state.item.nome"
-                      disabled
-                    />
-                  </input-container-component>
-                </div>
-                <div class="col-5 mb-3">
-                  <input-container-component title="Data de cadastro">
-                    <input
-                      type="text"
-                      class="form-control"
-                      :value="$store.state.item.created_at | formatDate"
-                      disabled
-                    />
-                  </input-container-component>
-                </div>
-                <div class="col-12 mb-3">
-                  <input-container-component
-                    title="Imagem"
-                    v-if="$store.state.item.imagem"
-                  >
-                    <img
-                      :src="`/storage/${$store.state.item.imagem}`"
-                      alt="Logo"
-                      width="60"
-                    />
-                  </input-container-component>
-                </div>
-              </div>
-            </template>
-
-            <div v-if="$store.state.form.operation == 'destroy'">
-              <div class="row">
-                <div class="col-3 mb-3">
-                  <input-container-component title="ID">
-                    <input
-                      type="number"
-                      class="form-control"
-                      :value="$store.state.item.id"
-                      disabled
-                    />
-                  </input-container-component>
-                </div>
-                <div class="col-9 mb-3">
-                  <input-container-component title="Nome">
-                    <input
-                      type="text"
-                      class="form-control"
-                      :value="$store.state.item.nome"
-                      disabled
-                    />
-                  </input-container-component>
-                </div>
-              </div>
-            </div>
-          </template>
-
-          <template v-slot:footer>
-            <button
-              type="button"
-              class="btn btn-secondary"
-              data-bs-dismiss="modal"
-            >
-              Fechar
-            </button>
-            <button
-              v-if="$store.state.form.operation == 'create'"
-              type="button"
-              class="btn btn-primary"
-              @click="save()"
-            >
-              Salvar
-            </button>
-            <button
-              v-if="$store.state.form.operation == 'edit'"
-              type="button"
-              class="btn btn-primary"
-              @click="update()"
-            >
-              Atualizar
-            </button>
-            <button
-              v-if="
-                $store.state.form.operation == 'destroy' &&
-                $store.state.transaction.status !== 'success'
-              "
-              type="button"
-              class="btn btn-danger"
-              @click="destroy()"
-            >
-              Remover
-            </button>
-          </template>
+          <template v-slot:footer> </template>
         </modal-component>
         <!--/ Modal Form -->
       </v-col>
@@ -274,22 +325,16 @@
 export default {
   data() {
     return {
+      dialog: false,
       baseUrl: "/v1/marca",
       urlFilter: "",
-      arquivoImagem: [],
-      titleTable: {
-        id: { title: "ID", type: "string" },
-        nome: { title: "Nome", type: "string" },
-        imagem: { title: "Imagem", type: "image" },
-        created_at: { title: "Data de cadastro", type: "date" },
-      },
-      dataTable: [],
       marcas: [],
       busca: { id: "", nome: "" },
       pagination: {
         current: 1,
         total: 0,
       },
+      imagem: [],
     };
   },
   mounted() {
@@ -324,20 +369,15 @@ export default {
       axios
         .get(url)
         .then((response) => {
-          this.marcas = response.data;
+          this.marcas = response.data.data;
 
           this.pagination.current = response.data.current_page;
           this.pagination.total = response.data.last_page;
           this.pagination.per_page = response.data.per_page;
-
-          this.dataTable = this.marcas.data;
         })
         .catch((errors) => {
           console.error(errors);
         });
-    },
-    loadFile(e) {
-      this.arquivoImagem = e.target.files;
     },
     createForm() {
       this.$store.state.form.operation = "create";
@@ -347,7 +387,7 @@ export default {
       let formData = new FormData();
 
       formData.append("nome", this.$store.state.item.nome);
-      formData.append("imagem", this.arquivoImagem[0]);
+      formData.append("imagem", this.imagem);
 
       let options = {
         headers: {
@@ -363,7 +403,7 @@ export default {
             "Cadastro realizado com sucesso";
           this.$store.state.transaction.message = `ID do registro: ${response.data.id}`;
 
-          inputImagem.value = "";
+          this.imagem = [];
 
           this.loadList();
         })
@@ -381,9 +421,9 @@ export default {
 
       formData.append("nome", this.$store.state.item.nome);
 
-      if (this.arquivoImagem[0]) {
+      if (this.imagem) {
         formData.append("_method", "put");
-        formData.append("imagem", this.arquivoImagem[0]);
+        formData.append("imagem", this.imagem);
       } else {
         formData.append("_method", "patch");
       }
@@ -403,7 +443,7 @@ export default {
           this.$store.state.transaction.message = response.data.msg;
           this.$store.state.transaction.errors = "";
 
-          inputImagem.value = "";
+          this.imagem = [];
 
           this.loadList();
         })
@@ -442,6 +482,19 @@ export default {
           this.$store.state.transaction.title = "Erro na transação";
           this.$store.state.transaction.errors = errors.response.data.errors;
         });
+    },
+    openDialog(form, obj = {}) {
+      this.$store.state.item = obj;
+
+      this.$store.state.transaction.status = "";
+      this.$store.state.transaction.title = "";
+      this.$store.state.transaction.message = "";
+      this.$store.state.transaction.errors = "";
+
+      this.$store.state.form.title = form.title;
+      this.$store.state.form.operation = form.operation;
+
+      this.dialog = true;
     },
   },
 };
